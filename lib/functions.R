@@ -221,9 +221,6 @@ TopFeatures <- function(total.table, type, subset, perc)
 
  }
 
-#---stastistics ----------------------------------------------------------------
-message("loading statistics functions")
-
 # make  distance in Spearman correlation  - for internal use
 # input: feature vectors (table)
 # output: class dist object
@@ -236,7 +233,7 @@ distSpear<-function (x)
 # good colours for heatplot
 cols.gentleman <- function(ncol=500) {
   library(RColorBrewer)
-  hmcol <- colorRampPalette(brewer.pal(10, 'RdBu'))(ncol)
+  hmcol <- colorRampPalette(brewer.pal(10, 'RdYlBu'))(ncol)
   return(rev(hmcol))
 }
 
@@ -325,7 +322,12 @@ names(dists)<-metric
 return (dists)
 }
 
+family.dist <- allDist(family.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
+genus.dist <- allDist(genus.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
+species.dist <- allDist(species.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
 
+test.dist1<-dist(family.avva)
+test.dist2<-dist(family.avva, method = 'euclidean')
 
 ################################################################################################### 
 ###################################################################################################
