@@ -37,14 +37,17 @@ hc <- hclust(distSpear(t(ff_par_top)), method="ward.D")
 # final pre-print change names of heatmap rows and cols
 colnames(ff_par_top) <- paste("o_", unlist(data.frame(strsplit(colnames(ff_par_top), "o_"))[2,]), sep="")
 # draw
-cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_fam.pdf", sep=""), width=23, height=18)
+cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_fam_g2.pdf", sep=""), width=23, height=18)
 #cairo_pdf(paste("graphs/heat_fam.pdf", sep=""), width=15, height=10)
-heatmap.2(distfun = dd, data.matrix(ff_par_top), Rowv=as.dendrogram(hr), 
+heatmap.2(data.matrix(ff_par_top), 
+          Rowv=as.dendrogram(hr),
+          distfun = function(x) dist(x, method = "euclidean"),
           dendrogram="row",
           col=cols.gentleman(500), 
           cexRow=1.2, cexCol=1.2, trace='none', scale="none", margin=c(25,20) )
 
 dev.off()
+
 
 
 genus.avva.g1 <- totalTable$genus[which(rownames(totalTable$genus)
@@ -63,9 +66,10 @@ hc <- hclust(distSpear(t(ff_par_top)), method="ward.D")
 # final pre-print change names of heatmap rows and cols
 colnames(ff_par_top) <- paste("o_", unlist(data.frame(strsplit(colnames(ff_par_top), "o_"))[2,]), sep="")
 # draw
-cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_genus.pdf", sep=""), width=23, height=18)
+cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_genus_g2.pdf", sep=""), width=23, height=18)
 #cairo_pdf(paste("graphs/heat_g.pdf", sep=""), width=15, height=10)
 heatmap.2(data.matrix(ff_par_top), Rowv=as.dendrogram(hr), 
+          distfun = function(x) dist(x, method = "euclidean"),
           #Colv=as.dendrogram(hc), dendrogram="both", #Colv=as.dendrogram(hc), 
           dendrogram="row",
           #col=gray(seq(0.1, 0.99, 0.001)), #cols.yuppie(500), 
@@ -90,9 +94,10 @@ hc <- hclust(distSpear(t(ff_par_top)), method="ward.D")
 # final pre-print change names of heatmap rows and cols
 colnames(ff_par_top) <- paste("o_", unlist(data.frame(strsplit(colnames(ff_par_top), "o_"))[2,]), sep="")
 # draw
-cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_species.pdf", sep=""), width=23, height=18)
+cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_species_g2.pdf", sep=""), width=23, height=18)
 #cairo_pdf(paste("graphs/heat_sp.pdf", sep=""), width=15, height=10)
 heatmap.2(data.matrix(ff_par_top), Rowv=as.dendrogram(hr), 
+          distfun = function(x) dist(x, method = "euclidean"),
           #Colv=as.dendrogram(hc), dendrogram="both", #Colv=as.dendrogram(hc), 
           dendrogram="row",
           #col=gray(seq(0.1, 0.99, 0.001)), #cols.yuppie(500), 

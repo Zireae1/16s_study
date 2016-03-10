@@ -234,9 +234,10 @@ distSpear<-function (x)
 # good colours for heatplot
 cols.gentleman <- function(ncol=500) {
   library(RColorBrewer)
-  hmcol <- colorRampPalette(brewer.pal(10, 'RdYlBu'))(ncol)
+  hmcol <- colorRampPalette(brewer.pal(10, 'RdBu'))(ncol)
   return(rev(hmcol))
 }
+
 
 # make  distance in Spearman correlation  - for internal use
 # input: feature vectors (table)
