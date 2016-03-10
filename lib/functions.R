@@ -221,6 +221,7 @@ TopFeatures <- function(total.table, type, subset, perc)
 
  }
 
+
 # make  distance in Spearman correlation  - for internal use
 # input: feature vectors (table)
 # output: class dist object
@@ -322,13 +323,6 @@ names(dists)<-metric
 return (dists)
 }
 
-family.dist <- allDist(family.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
-genus.dist <- allDist(genus.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
-species.dist <- allDist(species.avva, metric =c('JS','Spear','Eu','Man','Can','BC'))
-
-test.dist1<-dist(family.avva)
-test.dist2<-dist(family.avva, method = 'euclidean')
-
 ################################################################################################### 
 ###################################################################################################
 
@@ -376,3 +370,18 @@ PrintMeanAndStd<-function(fam.gen.spe.listTOP, min.trsh){
   }
   ### TO DO: print for one sample
 }
+
+PrintMeanAndStd2<-function(fam.gen.spe.listTOP, min.trsh, pathway){
+  MeansTOP <- lapply(fam.gen.spe.listTOP, colMeans) 
+  SdTOP <- lapply(fam.gen.spe.listTOP, function(x){apply(x,2,sd)})
+  for (i in 1:length(MeansTOP)){
+    ResultMeanAndSd<-cbind(round(MeansTOP[[i]][which(MeansTOP[[i]]>=min.trsh)],digits=2), 
+                           round(SdTOP[[i]][which(MeansTOP[[i]]>=min.trsh)], digits=2))
+    colnames(ResultMeanAndSd)<-c("Mean, %", "Stdev, %")
+    WriteTable (ResultMeanAndSd, pathway, paste("tableTOP_",i)) 
+  }
+  ### TO DO: print for one sample
+}
+
+
+

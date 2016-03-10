@@ -19,12 +19,13 @@ MDS<-function(dis, outdir, meta, colFact, plot_name, m_width = 7, m_height=5)
 }
 
 
-family.avva <- totalTable$family[which(rownames(totalTable$family)
+family.avva.g1 <- totalTable$family[which(rownames(totalTable$family)
                                        %in% totalTable$meta[which(totalTable$meta[, "Type.1"]
-                                                                  %in% "EKOK_1"), "samples_name"]),]
-FamilyTOPcase <- chooseTOPfeature(family.avva, perc = 85)
-dd <- bcdist(family.avva)
+                                                                  %in% "EKOK_2"), "samples_name"]),]
+FamilyTOPcase <- chooseTOPfeature(family.avva.g1, perc = 85)
+dd <- bcdist(family.avva.g1)
 
+library(gplots)
 flog.info("make heatmaps")
 # family 
 ff_par_top <- FamilyTOPcase[, which(colMaxs(FamilyTOPcase) > 3)]
@@ -32,23 +33,25 @@ ff_par_top <- ff_par_top[, order(colMaxs(ff_par_top), decreasing = F)]
 dd <- bcdist(ff_par_top)
 hr <- hclust(dd, method="ward.D")
 hc <- hclust(distSpear(t(ff_par_top)), method="ward.D")
+
 # final pre-print change names of heatmap rows and cols
 colnames(ff_par_top) <- paste("o_", unlist(data.frame(strsplit(colnames(ff_par_top), "o_"))[2,]), sep="")
 # draw
 cairo_pdf(paste("/home/anna/metagenome/AVVA/out/Case/Graphs/heat_fam.pdf", sep=""), width=23, height=18)
 #cairo_pdf(paste("graphs/heat_fam.pdf", sep=""), width=15, height=10)
-heatmap.2(data.matrix(ff_par_top), Rowv=as.dendrogram(hr), 
+heatmap.2(distfun = dd, data.matrix(ff_par_top), Rowv=as.dendrogram(hr), 
           dendrogram="row",
           col=cols.gentleman(500), 
-          cexRow=1.2, cexCol=1.2, trace='none', scale="none", margin=c(25,20), )
+          cexRow=1.2, cexCol=1.2, trace='none', scale="none", margin=c(25,20) )
+
 dev.off()
 
 
-genus.avva <- totalTable$genus[which(rownames(totalTable$genus)
+genus.avva.g1 <- totalTable$genus[which(rownames(totalTable$genus)
                                        %in% totalTable$meta[which(totalTable$meta[, "Type.1"]
-                                                                  %in% "EKOK_1"), "samples_name"]),]
-GenusTOPcase <- chooseTOPfeature(genus.avva, perc = 85)
-dd <- bcdist(genus.avva)
+                                                                  %in% "EKOK_2"), "samples_name"]),]
+GenusTOPcase <- chooseTOPfeature(genus.avva.g1, perc = 85)
+dd <- bcdist(genus.avva.g1)
 
 # genus
 ff_par_top <- GenusTOPcase[, which(colMaxs(GenusTOPcase) > 3)]
@@ -72,11 +75,11 @@ heatmap.2(data.matrix(ff_par_top), Rowv=as.dendrogram(hr),
 #cexRow=1.2, cexCol=1.2, trace='none', scale="none", margin=c(32,10), )
 dev.off()
 
-species.avva <- totalTable$species[which(rownames(totalTable$species)
+species.avva.g1 <- totalTable$species[which(rownames(totalTable$species)
                                      %in% totalTable$meta[which(totalTable$meta[, "Type.1"]
-                                                                %in% "EKOK_1"), "samples_name"]),]
-SpeciesTOPcase <- chooseTOPfeature(species.avva, perc = 85)
-dd <- bcdist(species.avva)
+                                                                %in% "EKOK_2"), "samples_name"]),]
+SpeciesTOPcase <- chooseTOPfeature(species.avva.g1, perc = 85)
+dd <- bcdist(species.avva.g1)
 
 # species
 ff_par_top <- SpeciesTOPcase[, which(colMaxs(SpeciesTOPcase) > 3)]
