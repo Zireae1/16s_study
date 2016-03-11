@@ -421,5 +421,230 @@ PrintMeanAndStd2<-function(fam.gen.spe.listTOP, min.trsh){
   ### TO DO: print for one sample
 }
 
+################################################################################
+# Stat.tests functions                                                        ##
+################################################################################
+ttest_feats_both_dirs <- function(feat, group1, group2, maxpv=0.05, pairedt, ...)
+{   
+  pg <- c() # p-values for greater
+  pl <- c() # p-values for less
+  fcg <- c() # median fold change for greater
+  fcl <- c() # median fold change for less
+  for(i in 1:ncol(feat))
+  {  
+    w <- t.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="greater", ...)    
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pg <- append(pg, tmp)    
+      fcg <- append(fcg, median(feat[group1, i])/median(feat[group2, i]))
+    }
+    
+    w <- t.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="less", ...)
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pl <- append(pl, tmp)
+      fcl <- append(fcl, median(feat[group1, i])/median(feat[group2, i]))
+    }
+  }  
+  pg_adj <- p.adjust(pg, method='fdr')
+  pl_adj <- p.adjust(pl, method='fdr')      
+  i <- which(pg_adj <= maxpv)
+  pg_adj <- pg_adj[i]
+  fcg <- fcg[i]
+  i <- which(pl_adj <= maxpv)
+  pl_adj <- pl_adj[i]  
+  fcl <- fcl[i]
+  res <- list(pg_adj, fcg, pl_adj, fcl)  
+  names(res) <- c("greater", "greater_median_FC", "less", "less_median_FC")
+  res
+}
+
+# test log fold change for each featurem then adjust p-values
+# WARNING! I drop values where feat is zero in at least one of two samples
+ttest_paired_log_fc <- function(feat, group1, group2, maxpv=0.05)
+{   
+  
+  #feat=ff
+  #group1=tags_sol_il[1,]
+  #group2=tags_sol_il[2,]
+  #i =1 
+  
+  pg <- c()
+  pl <- c()  
+  fcg <- c() # median fold change for greater
+  fcl <- c() # median fold change for less  
+  for(i in 1:ncol(feat))
+  {
+    #print(colnames(feat)[i])
+    
+    tt <- log(feat[group1, i] / feat[group2, i])
+    # leave finite values
+    tt <- tt[is.finite(tt)]
+    # if one value is left, then not enough, skip it
+    if(length(tt) <= 1)
+    {
+      next
+    }
+    w <- t.test(tt, mu=0, alternative="greater")    
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pg <- append(pg, tmp)    
+      fcg <- append(fcg, median(tt))
+    }    
+    
+    w <- t.test(tt, mu=0, alternative="less")
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pl <- append(pl, tmp)
+      fcl <- append(fcl, median(tt))
+    }
+  }  
+  #print("im out")
+  pg_adj <- p.adjust(pg, method='fdr')
+  pl_adj <- p.adjust(pl, method='fdr')      
+  i <- which(pg_adj <= maxpv)
+  pg_adj <- pg_adj[i]
+  fcg <- fcg[i]
+  i <- which(pl_adj <= maxpv)
+  pl_adj <- pl_adj[i]  
+  fcl <- fcl[i]
+  res <- list(pg_adj, fcg, pl_adj, fcl)  
+  names(res) <- c("greater", "greater_median_logFC", "less", "less_median_logFC")
+  res
+}
+
+wilcox_feats_both_dirs <- function(feat, group1, group2, maxpv=0.05, pairedt)
+{   
+  pg <- c()
+  pl <- c()  
+  fcg <- c() # median fold change for greater
+  fcl <- c() # median fold change for less
+  for(i in 1:ncol(feat))
+  {  
+    w <- wilcox.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="greater")    
+    if(!is.na(w$p.value))
+    {
+      tmp <- as.numeric(w$p.value)
+      names(tmp) <- colnames(feat)[i]
+      pg <- append(pg, tmp)    
+      fcg <- append(fcg, as.numeric((median(feat[group1, i])/median(feat[group2, i]))))
+    }
+    
+    w <- wilcox.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="less")
+    if(!is.na(w$p.value))
+    {
+      tmp <- as.numeric(w$p.value)
+      names(tmp) <- colnames(feat)[i]
+      pl <- append(pl, tmp)
+      fcl <- append(fcl, as.numeric(median(feat[group1, i])/median(feat[group2, i])))
+    }
+  }  
+  pg_adj <- p.adjust(pg, method='fdr')
+  pl_adj <- p.adjust(pl, method='fdr')      
+  i <- which(pg_adj <= maxpv)
+  pg_adj <- pg_adj[i]
+  fcg <- fcg[i]
+  i <- which(pl_adj <= maxpv)
+  pl_adj <- pl_adj[i]  
+  fcl <- fcl[i]
+  res <- list(pg_adj, fcg, pl_adj, fcl)
+  names(res) <- c("greater", "greater_median_FC", "less", "less_median_FC")
+  res
+}
+
+# paired; output mean of deltas (not fold change of medians)
+wilcox_feats_both_dirs_PAIRED_MEAN_DELTA <- function(feat, group1, group2, maxpv=0.05)
+{   
+  pairedt <- TRUE
+  pg <- c()
+  pl <- c()  
+  fcg <- c() # median fold change for greater
+  fcl <- c() # median fold change for less
+  for(i in 1:ncol(feat))
+  {  
+    print(colnames(feat)[i])
+    w <- wilcox.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="greater")    
+    if(!is.na(w$p.value))
+    {
+      tmp <- as.numeric(w$p.value)
+      names(tmp) <- colnames(feat)[i]
+      pg <- append(pg, tmp)
+      #fcg <- append(fcg, as.numeric((median(feat[group1, i])/median(feat[group2, i]))))
+      tmp <- feat[group2, i] - feat[group1, i]
+      print(tmp)
+      fcg <- append(fcg, as.numeric(mean(tmp)))
+    }
+    
+    w <- wilcox.test(feat[group1, i], feat[group2, i], paired=pairedt, alternative="less")
+    if(!is.na(w$p.value))
+    {
+      tmp <- as.numeric(w$p.value)
+      names(tmp) <- colnames(feat)[i]
+      pl <- append(pl, tmp)
+      #fcl <- append(fcl, as.numeric(median(feat[group1, i])/median(feat[group2, i])))
+      tmp <- feat[group2, i] - feat[group1, i]
+      print(tmp)
+      fcl <- append(fcl, as.numeric(mean(tmp)))
+    }
+  }  
+  pg_adj <- p.adjust(pg, method='fdr')
+  pl_adj <- p.adjust(pl, method='fdr')      
+  i <- which(pg_adj <= maxpv)
+  pg_adj <- pg_adj[i]
+  fcg <- fcg[i]
+  i <- which(pl_adj <= maxpv)
+  pl_adj <- pl_adj[i]  
+  fcl <- fcl[i]
+  res <- list(pg_adj, fcg, pl_adj, fcl)
+  names(res) <- c("greater", "greater_mean_delta", "less", "less_mean_delta")
+  res
+}
+
+wilcox_onesample_both_dirs <- function(feat, group, x, maxpv=0.05)
+{   
+  pg <- c() # p-values for greater
+  pl <- c() # p-values for less
+  fcg <- c() # median fold change for greater
+  fcl <- c() # median fold change for less
+  for(i in 1:ncol(feat))
+  {  
+    w <- wilcox.test(feat[group, i], mu = feat[x, i], alternative="greater")    
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pg <- append(pg, tmp)    
+      fcg <- append(fcg, median(feat[group, i])/feat[x, i])
+    }
+    
+    w <- wilcox.test(feat[group, i], mu = feat[x, i], alternative="less")
+    if(!is.na(w$p.value))
+    {
+      tmp <- w$p.value
+      names(tmp) <- colnames(feat)[i]
+      pl <- append(pl, tmp)
+      fcl <- append(fcl, median(feat[group, i])/feat[x, i])
+    }
+  }    
+  pg_adj <- p.adjust(pg, method='fdr')
+  pl_adj <- p.adjust(pl, method='fdr')      
+  i <- which(pg_adj <= maxpv)
+  pg_adj <- pg_adj[i]
+  fcg <- fcg[i]
+  i <- which(pl_adj <= maxpv)
+  pl_adj <- pl_adj[i]  
+  fcl <- fcl[i]
+  res <- list(pg_adj, fcg, pl_adj, fcl)  
+  names(res) <- c("greater", "greater_median_FC", "less", "less_median_FC")
+  res
+}
 
 
