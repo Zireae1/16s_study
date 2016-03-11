@@ -9,7 +9,6 @@ current_directory <- "~/metagenome/AVVA"
 setwd(current_directory)
 
 source("lib/functions.R")
-source("lib/visualization.R")
 
 #loading libraries
 library(stringr)
@@ -58,22 +57,20 @@ genus.avva.g2 <- totalTable$genus[which(rownames(totalTable$family)
 species.avva.g2 <- totalTable$species[which(rownames(totalTable$family) 
                                             %in% totalTable$meta[which(totalTable$meta[,"Type.1"] 
                                                                        %in% "EKOK_2"),"samples_name"]),]
+
 flog.info("writing")
 
-fam.gen.spe.list.g2 <- list(family=family.avva.g2, genus=genus.avva.g2, species=species.avva.g2)
 fam.gen.spe.list.g1 <- list(family=family.avva.g1, genus=genus.avva.g1, species=species.avva.g1)
+fam.gen.spe.list.g2 <- list(family=family.avva.g2, genus=genus.avva.g2, species=species.avva.g2)
 
-fam.gen.spe.listTOP.g1 <- SampleTopFeatures(fam.gen.spe.list.g1)
-fam.gen.spe.listTOP.g2 <- SampleTopFeatures(fam.gen.spe.list.g2)
+fam.gen.spe.listTOP.g1 <- lapply(fam.gen.spe.list.g1, chooseTOPfeature, perc = 85)
+fam.gen.spe.listTOP.g2 <- lapply(fam.gen.spe.list.g2, chooseTOPfeature, perc = 85)
 
 #### Print Mean and Stdev for group of samples 
 PrintMeanAndStd(fam.gen.spe.listTOP.g1, min.trsh=1)
-PrintMeanAndStd2(fam.gen.spe.listTOP.g2, min.trsh=1, pathway$group.two$outdir)
+PrintMeanAndStd2(fam.gen.spe.listTOP.g2, min.trsh=1)
 
-
-#### Print Mean and Stdev for group of samples 
-
-
+source("lib/visualization.R")
 
 message("start working with alpha diversity")
 alphaDivCase <- (totalTable$AlphaDiv[which(rownames(totalTable$AlphaDiv) 
@@ -91,8 +88,6 @@ WriteTable (AlphaDivMeanSd, OutdirCase, "AlphaDivMeanAndSd")
 cairo_pdf((paste(OutdirCase, '/Graphs/alpha_boxplot.pdf', sep = "/")), width = 10,  height = 10)
 boxplot(alphaDivCase$AlphaDiversity)
 dev.off()
-
-message("end start working with alpha diversity")
 
 message("start sequencing statistics")
 #ToDo: statistics for project samples
@@ -112,22 +107,6 @@ message("end sequencing statistics")
 ######################################################################################
 
 #ToDO: запись таблиц топовых значений для неограниченного числа групп по family, genus, species, otu
-
-
-#--- draw MDS for different taxonomy levels---
-for (i in names(totalTable)[1:3]){
-  dist<-bcdist(totalTable[[i]][which(totalTable$meta[,"Type.1"] %in% "EKOK_1"),])
-  MDS(dist, pathway$group.one$GraphsDir, totalTable$meta[which(totalTable$meta[,"Type.1"] %in% "EKOK_1"),],
-      "Type.1", i)
-}
-
-#--- draw MDS for different taxonomy levels---
-for (i in names(totalTable)[1:3]){
-  dist<-bcdist(totalTable[[i]][which(totalTable$meta[,"Type.1"] %in% "EKOK_2"),])
-  MDS(dist, pathway$group.one$GraphsDir, totalTable$meta[which(totalTable$meta[,"Type.1"] %in% "EKOK_2"),],
-      "Type.1", i)
-}
-
 
 # выдает имена образцов из таблицы метаданных которым соответствует EKOK_1 
 #totalTable$meta[which(totalTable$meta[, "Type.1"] %in% "EKOK_1"), "samples_name"]
